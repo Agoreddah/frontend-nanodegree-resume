@@ -324,9 +324,8 @@ if (bio.skills) {
 if (work) {
 
     jQuery("#workExperience").append(HTMLworkStart);
-    appendObject(work.jobs[0], ".work-entry:first");
-    jQuery("#workExperience").append(HTMLworkStart);
-    appendObject(work.jobs[1], ".work-entry:last");
+    appendObject(work.jobs[0], ".work-entry");
+    prependObject(work.jobs[1], ".work-entry");
 
 }
 
