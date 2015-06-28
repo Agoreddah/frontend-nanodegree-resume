@@ -1,5 +1,212 @@
 /* jslint browser: true */
-/* global $, jQuery, alert */
+/* global $, jQuery, alert, console */
+
+var Builder = (function(){
+
+	"use strict";
+
+	Builder = {};
+
+	var formattedData,
+		formattedKey,
+		formattedArray = '',
+		unformattedData,
+		value,
+		key,
+		keyName,
+		arrayValue,
+		i = 0;
+
+	/**
+	 * Return data type
+	 * @param data
+	 * @return dataType
+	 */
+	function getDataType(data) {
+
+	    "use strict";
+
+	    var dataType;
+
+	    dataType = typeof(data);
+
+	    return dataType;
+	}
+
+	/**
+	 * get formatted data from the Array
+	 * replace helpers.js variables
+	 * @param array
+	 * @param keyName
+	 * @return formattedArray
+	 */
+	function getFormattedArray (array, keyName){
+
+	    var formattedArray = '',
+	        formattedKey,
+	        formattedData,
+	        i = 0;
+
+	    formattedKey = "HTML" + keyName;
+
+	    for (i; i < array.length; i += 1) {
+
+	        formattedData = window[formattedKey].replace("%data%", array[i]);
+
+	        formattedArray = formattedArray + formattedData;
+
+	    }
+
+	    return formattedArray;
+	}
+
+	/**
+	 * search and transform helper.js variables with object's data
+	 * Function checks if the key of the object is not another object
+	 * @param obj - Object
+	 * @param key - Key from the given Object
+	 * @return formattedData
+	 */
+	function getFormattedData(obj, key) {
+
+	    var formattedData,
+	        formattedKey,
+	        value,
+	        keyName,
+	        arrayValue;
+
+	    value = obj[key];
+
+	    formattedKey = "HTML" + key;
+
+	    if (window.hasOwnProperty(formattedKey) && typeof(value) !== "object") {
+
+	        formattedData = window[formattedKey].replace("%data%", value);
+
+	    } else if (typeof(value) === "object") {
+
+	        keyName = key;
+	        arrayValue = value;
+
+	        formattedData = getFormattedArray(arrayValue, keyName);
+
+	    } else {
+
+	        return false;
+
+	    }
+
+	    return formattedData;
+
+	}
+
+	function doAttachment(attacheddData, locator, attachment){
+
+		attachment.toLowerCase();
+
+		if ( attachment === 'append' ){
+			jQuery(locator).append(attacheddData);
+		}
+	    else if ( attachment === 'prepend' ){
+			jQuery(locator).prepend(attacheddData);
+	    }
+	    else{
+			console.log('do not forget to defined append or prepend attachment style');
+			return false;
+	    }
+
+		// cleaning mechanism
+	    formattedArray, formattedData, attacheddData = '';
+
+	    return formattedArray, formattedData, attacheddData;
+	}
+
+	/**
+	 * Append single formatted value to the locator
+	 * @param obj - Object
+	 * @param key - Single key from the given Object
+	 * @param locator - jQuery locator
+	 * @param attachmentStyle - append or prepend
+	 */
+	Builder.attachSingleValue = function(obj, key, locator, attachmentStyle) {
+
+	    var formattedData;
+
+	    formattedData = getFormattedData(obj, key);
+
+		doAttachment(formattedData, locator, attachmentStyle);
+
+	};
+
+	/**
+	 * Append object with formatted values to the locator
+	 * @param obj - Object
+	 * @param locator - jQuery locator
+	 * @param attachmentStyle - append or prepend
+	 */
+	Builder.attachObject = function(obj, locator, attachmentStyle) {
+
+	    var formattedArray = '',
+	        formattedData,
+	        key;
+
+	    for (key in obj) {
+
+	        if (obj.hasOwnProperty(key)) {
+
+	            formattedData = getFormattedData(obj, key);
+
+	            formattedArray += formattedData;
+
+	        }
+
+	    }
+
+	    doAttachment(formattedArray, locator, attachmentStyle);
+
+	}
+
+	/**
+	 * Append array with formattedData to the locator
+	 * htmlVarName is variable name from helper.js where
+	 * @param obj - Object
+	 * @param locator - jQuery locator
+	 * @param htmlVarName - HTML variable name from helper.js
+	 * @param attachmentStyle - append or prepend
+	 */
+	Builder.attachArray = function(array, locator, htmlVarName, attachmentStyle) {
+
+	    var formattedArray = '',
+	        value,
+	        unformattedData,
+	        formattedData,
+	        i = 0;
+
+	    for (i; i < array.length; i += 1) {
+
+	        value = array[i];
+	        unformattedData = htmlVarName;
+
+	        if (window.hasOwnProperty(unformattedData) && typeof(value) !== "object") {
+
+	            formattedData = window[unformattedData].replace("%data%", value);
+
+	            formattedArray = formattedArray + formattedData;
+
+	        }
+
+	    }
+
+	    doAttachment(formattedArray, locator, attachmentStyle);
+
+
+
+	}
+
+	return Builder;
+
+})(Builder);
+
 /////
 //
 // DATA OBJECTS
@@ -9,7 +216,6 @@ var bio = {
     headerName: 'Tomas Chudjak',
     headerRole: 'Webdeveloper',
     contacts: {
-
         mobile: '+421 949 099 955',
         email: 'tomas@kleidi.sk',
         github: 'https://github.com/Agoreddah',
@@ -17,11 +223,19 @@ var bio = {
         location: 'Bangalore, India'
     },
     welcomeMsg: 'Just another handsome guy from Slovakia',
-    skills: {
-        skills: ['Play poker with the poker face', 'Brew and drink special slovak 52% plum alcohol \"slivovica\"', 'Read your mind you filthy monkey ;)']
+    skills: ['Play poker with the poker face', 'Brew and drink special slovak 52% plum alcohol \"slivovica\"', 'Read your mind you filthy monkey ;)'],
+    bioPic: 'https://igcdn-photos-d-a.akamaihd.net/hphotos-ak-xft1/t51.2885-19/11123656_520967028041747_1809151877_a.jpg',
+    display: function(skillLocator){
+		Builder.attachSingleValue(bio, "headerRole", "#header", "prepend");
+		Builder.attachSingleValue(bio, "headerName", "#header", "prepend");
+		Builder.attachSingleValue(bio, "bioPic", "#header", "append");
+		Builder.attachSingleValue(bio, "welcomeMsg", "#header", "append");
+		jQuery("#header").append(HTMLskillsStart);
+		Builder.attachArray(bio.skills, "#skills", "HTMLskills", "prepend");
     },
-    bioPic: 'https://igcdn-photos-d-a.akamaihd.net/hphotos-ak-xft1/t51.2885-19/11123656_520967028041747_1809151877_a.jpg'
-
+    displayContacts : function(contactsLocator){
+		Builder.attachObject(bio.contacts, contactsLocator, "prepend");
+    }
 };
 
 var work = {
@@ -42,7 +256,13 @@ var work = {
         workLocation: 'Bangalore, India',
         workDescription: 'Team lead mentor responsible for developing GUI features and Continuous integration environment. As a part of project and Know-How transfer to India branch, I was involved to continue in the same project as a member of Nokia company. My basic role is mentoring, in focus with developing new features - rebranding according to new Nokia guidelines and Richfaces update to 4.4 version. Second half of the position responsibility, is test environment preparation for continuous integration, modification of the automated Robotframework based testcases for new GUI and cloud based testbed management for entire team in India. Project is part of the SDM technologies at Nokia R&D.'
 
-    }]
+    }],
+
+    display: function(){
+		jQuery("#workExperience").append(HTMLworkStart);
+		Builder.attachObject(work.jobs[0], ".work-entry", "append");
+		Builder.attachObject(work.jobs[1], ".work-entry", "prepend");
+    }
 
 };
 
@@ -55,6 +275,11 @@ var projects = {
         projectDescription: 'Website for small but uniquely delicious family restaurant, located in Zilina, Slovakia',
         projectImage: ['images/sentami.jpg', 'images/sentami2.jpg']
 
+    },
+
+    display : function(){
+	    jQuery("#projects").append(HTMLprojectStart);
+	    Builder.attachObject(projects.Sentami, ".project-entry", "append");
     }
 
 };
@@ -72,286 +297,36 @@ var education = {
         schoolDates: '2011',
         schoolLocation: 'Patras, Greece',
         schoolMajor: 'Administration'
-    }]
+    }],
+
+    display : function(){
+    	jQuery("#education").append(HTMLschoolStart);
+    	Builder.attachObject(education.schools[0], ".education-entry:first", "append");
+    	Builder.attachObject(education.schools[1], ".education-entry:nth-child(2)", "append");
+    }
 };
 
 /////
 //
-// FORMATTING, APPENDING, PREPENDING functions
+// Display - function callers
 //
 /////
 
-/**
- * get formatted data from the Array
- * replace helpers.js variables
- * @param array
- * @param keyName
- * @return formattedArray
- */
-function getFormattedArray(array, keyName) {
-
-    "use strict";
-
-    var formattedArray = '',
-        formattedKey,
-        formattedData,
-        i = 0;
-
-    formattedKey = "HTML" + keyName;
-
-    for (i; i < array.length; i += 1) {
-
-        formattedData = window[formattedKey].replace("%data%", array[i]);
-
-        formattedArray = formattedArray + formattedData;
-
-    }
-
-    return formattedArray;
-
-}
-
-/**
- * search and transform helper.js variables with object's data
- * Function checks if the key of the object is not another object
- * @param obj - Object
- * @param key - Key from the given Object
- * @return formattedData
- */
-function getFormattedData(obj, key) {
-
-    "use strict";
-
-    var formattedData,
-        formattedKey,
-        value,
-        keyName,
-        arrayValue;
-
-    value = obj[key];
-
-    formattedKey = "HTML" + key;
-
-    if (window.hasOwnProperty(formattedKey) && typeof(value) !== "object") {
-
-        formattedData = window[formattedKey].replace("%data%", value);
-
-    } else if (typeof(value) === "object") {
-
-        keyName = key;
-        arrayValue = value;
-
-        formattedData = getFormattedArray(arrayValue, keyName);
-
-    } else {
-
-        return false;
-
-    }
-
-    return formattedData;
-
-}
-
-/**
- * Return data type
- * @param data
- * @return dataType
- */
-function getDataType(data) {
-
-    "use strict";
-
-    var dataType;
-
-    dataType = typeof(data);
-
-    return dataType;
-}
-
-/**
- * Append single formatted value to the locator
- * @param obj - Object
- * @param key - Key from the given Object
- * @param locator - jQuery locator
- */
-function appendSingleValue(obj, key, locator) {
-
-    "use strict";
-
-    var formattedData;
-
-    formattedData = getFormattedData(obj, key);
-
-    jQuery(locator).append(formattedData);
-
-}
-
-/**
- * Prepend single formatted value to the locator
- * @param obj - Object
- * @param key - Key from the given Object
- * @param locator - jQuery locator
- */
-function prependSingleValue(obj, key, locator) {
-
-    "use strict";
-
-    var formattedData;
-
-    formattedData = getFormattedData(obj, key);
-
-    jQuery(locator).prepend(formattedData);
-
-}
-
-/**
- * Append object with formatted values to the locator
- * @param obj - Object
- * @param locator - jQuery locator
- */
-function appendObject(obj, locator) {
-
-    "use strict";
-
-    var formattedArray = '',
-        formattedData,
-        key;
-
-    for (key in obj) {
-
-        if (obj.hasOwnProperty(key)) {
-
-            formattedData = getFormattedData(obj, key);
-
-            formattedArray = formattedArray + formattedData;
-
-        }
-
-    }
-
-    jQuery(locator).append(formattedArray);
-
-}
-
-/**
- * Append object with formatted values to the locator
- * @param obj - Object
- * @param locator - jQuery locator
- */
-function prependObject(obj, locator) {
-
-    "use strict";
-
-    var formattedArray = '',
-        formattedData,
-        key;
-
-    for (key in obj) {
-
-        if (obj.hasOwnProperty(key)) {
-
-            formattedData = getFormattedData(obj, key);
-
-            formattedArray = formattedArray + formattedData;
-
-        }
-
-    }
-
-    jQuery(locator).prepend(formattedArray);
-
-}
-
-/**
- * Append array with formattedData to the locator
- * htmlVarName is variable name from helper.js where
- * @param obj - Object
- * @param locator - jQuery locator
- * @param htmlVarName - HTML variable name from helper.js
- */
-function appendArray(array, locator, htmlVarName) {
-
-    "use strict";
-
-    var formattedArray = '',
-        value,
-        unformattedData,
-        formattedData,
-        i = 0;
-
-    for (i; i < array.length; i += 1) {
-
-        value = array[i];
-        unformattedData = htmlVarName;
-
-        if (window.hasOwnProperty(unformattedData) && typeof(value) !== "object") {
-
-            formattedData = window[unformattedData].replace("%data%", value);
-
-            formattedArray = formattedArray + formattedData;
-
-        }
-
-    }
-
-    jQuery(locator).append(formattedArray);
-
-}
-
-/////
-//
-// BUILDERS - function callers
-//
-/////
-
-// add bio info
-prependSingleValue(bio, "headerRole", "#header");
-prependSingleValue(bio, "headerName", "#header");
-appendObject(bio.contacts, "#topContacts");
-appendSingleValue(bio, "bioPic", "#header");
-appendSingleValue(bio, "welcomeMsg", "#header");
-
-// add skills
-if (bio.skills) {
-
-    jQuery("#header").append(HTMLskillsStart);
-    appendArray(bio.skills.skills, "#skills", "HTMLskills");
-
-}
+// add bio info and skills
+bio.display();
+bio.displayContacts("#topContacts");
 
 // add work
-if (work) {
-
-    jQuery("#workExperience").append(HTMLworkStart);
-    appendObject(work.jobs[0], ".work-entry");
-    prependObject(work.jobs[1], ".work-entry");
-
-}
+work.display();
 
 // add projects
-if (projects) {
-
-    jQuery("#projects").append(HTMLprojectStart);
-    appendObject(projects.Sentami, ".project-entry");
-
-}
+projects.display();
 
 // add education
-if (education) {
-
-    jQuery("#education").append(HTMLschoolStart);
-    appendObject(education.schools[0], ".education-entry:first");
-    appendObject(education.schools[1], ".education-entry:nth-child(2)");
-
-}
+education.display();
 
 // add map
 jQuery("#mapDiv").append(googleMap);
 
 // add let's connect
-if (bio) {
-
-    appendObject(bio.contacts, "#footerContacts");
-
-}
+bio.displayContacts("#footerContacts");
