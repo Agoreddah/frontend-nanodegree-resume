@@ -198,8 +198,8 @@ var Builder = (function() {
 
 
 
-    }
-
+    };
+    
     return Builder;
 
 })(Builder);
@@ -221,7 +221,7 @@ var bio = {
     },
     welcomeMsg: 'Just another handsome guy from Slovakia',
     skills: ['Play poker with the poker face', 'Brew and drink special slovak 52% plum alcohol \"slivovica\"', 'Read your mind you filthy monkey ;)'],
-    bioPic: 'https://igcdn-photos-d-a.akamaihd.net/hphotos-ak-xft1/t51.2885-19/11123656_520967028041747_1809151877_a.jpg',
+    bioPic: 'images/me.jpg',
     display: function(skillLocator) {
         Builder.attachSingleValue(bio, "headerRole", "#header", "prepend");
         Builder.attachSingleValue(bio, "headerName", "#header", "prepend");
